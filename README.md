@@ -8,7 +8,7 @@ Current version support:
 
 ## Prerequisite
 
-Go version 1.16 or above [Install go](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiQorLn9_vzAhUPOSsKHccqDlgQFnoECAIQAQ&url=https%3A%2F%2Fgolang.org%2Fdoc%2Finstall&usg=AOvVaw2iPQ4PF_CePbLDqF11JL33)  
+Go version 1.16 or above [Install go](https://golang.org/doc/install)  
 Kubectl in current home directory (has .kubeconfig directory)
 ## Installation
 ```
@@ -16,7 +16,8 @@ cd $repo
 go mod download
 go build
 ```
-
+## Reference
+[Akc-testnet information in dev-qa environment](https://docs.google.com/spreadsheets/d/1m_BaH2tyyn2UxaIfdGjtmQk6kpLMzS8trx0XVa9TLM0)
 ## Usage
 
 Select option: 
