@@ -4,7 +4,7 @@ Deploy cosmos network using [blogd](https://github.com/phanhoc/blog/tree/dev) re
 Current version support:
 - [ ] Create persistence peer
 - [ ] Create seed connect to persistence peer
-- [x] Create peer connec to seed
+- [x] Create peer connect to seed
 
 ## Prerequisite
 
@@ -87,7 +87,7 @@ address is wallet address created in previous step
     --gas=auto \
     --gas-adjustment=1.4 \
     --keyring-backend=test
-    
+
     blogd query staking validators
     blogd query tendermint-validator-set
 ```
