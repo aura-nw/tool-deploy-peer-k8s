@@ -1,0 +1,90 @@
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+  namespace: {{ .Namespace}}
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJyZWdpc3RyeS5naXRsYWIuY29tIjp7InVzZXJuYW1lIjoiZmlib25hY2NpOTk4IiwicGFzc3dvcmQiOiJBWWVZeVF5V3lDNVduQzQ0clZQVyIsImVtYWlsIjoiZmlib25hY2NpOTk4QGdtYWlsLmNvbSIsImF1dGgiOiJabWxpYjI1aFkyTnBPVGs0T2tGWlpWbDVVWGxYZVVNMVYyNURORFJ5VmxCWCJ9fX0=
+type: kubernetes.io/dockerconfigjson
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-peer-{{ .PeerName}}
+  namespace: {{ .Namespace}}
+data:
+  CHAIN_ID: "{{ .ChainId }}"
+  MONIKER: "peer-{{ .PeerName}}"
+  SEED_NODE_ID: "{{ .SeedNodeID }}"
+  SEED_NODE_ADDRESS: "{{ .SeedNodeAddress }}"
+  SEED_P2P_PORT: "{{ .SeedP2PPort}}"
+  EXTERNAL_ADDRESS: "{{ .ClusterIPService }}"
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: peer-{{ .PeerName}}
+  namespace: {{ .Namespace}}
+spec:
+  serviceName: peer-{{ .PeerName}}
+  selector:
+    matchLabels:
+      app: peer-{{ .PeerName}}
+  template:
+    metadata:
+      labels:
+        app: peer-{{ .PeerName}}
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - command:  
+        - /bin/sh 
+        - -c
+        - |
+          #while true; do sleep 30; done;
+          until [ -f /root/genesis-seed.json ]; do
+            sleep 1
+          done
+          if [ ! -f /root/.blog/config/genesis.json ]; then   
+            blogd init $MONIKER --chain-id $CHAIN_ID;
+            rm /root/.blog/config/genesis.json 
+            cp /root/genesis-seed.json /root/.blog/config/genesis.json
+          fi
+          CONFIG_FILE=/root/.blog/config/config.toml
+          sed -i "s/\(external_address *= *\).*/\1\"$EXTERNAL_ADDRESS\"/" $CONFIG_FILE
+          sed -i "s/\(seeds *= *\).*/\1\"$SEED_NODE_ID@$SEED_NODE_ADDRESS:$SEED_P2P_PORT\"/" $CONFIG_FILE
+          sed -i "s/\(addr_book_strict *= *\).*/\1false/" $CONFIG_FILE
+          blogd start;
+        # args: [ "while true; do sleep 30; done;" ]
+        image: registry.gitlab.com/akachain/product/akc-landing-page-gitops/cosmos-blog/main_1d85ed6b
+        imagePullPolicy: IfNotPresent
+        name: peer-{{ .PeerName}}
+        readinessProbe:
+          tcpSocket:
+            port: 26656
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        envFrom:
+        - configMapRef:
+            name: env-peer-{{ .PeerName}}
+        volumeMounts:
+        - mountPath: /root
+          name: peer-{{ .PeerName}}-pvc
+
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: peer-{{ .PeerName}}-pvc
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+        
