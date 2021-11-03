@@ -48,5 +48,46 @@ Namespace peer: Namespace in k8 where pod peer will be created
 ChainId: Chain Id in seed  
 Seed node address: seed peer address domain name (svc name in k8)  
 Namespace seed: Namespace where pod seed existed  
-Pod name seed: pod name seed in k8
+Pod name seed: pod name seed in k8  
 Home path in seed: Home path network where has directory /config/genesis.json (in order to copy genesis from seed to another peer)
+
+## Script
+
+### Create account
+Run command in pod peer:
+```
+    kubectl exec -it peer-$peername-0 -- bash
+    blogd keys add $account
+```
+### Call faucet to get token
+Run command in any pod:
+```
+    kubectl exec -it peer-$peername-0 -- bash
+    curl --location --request GET 'http://node-cosmos-faucet/?address=$address'
+    # for i in {1..5}; do curl --location --request GET 'http://node-cosmos-faucet/?address=$address';sleep 2; done
+    blogd query bank balances $address
+```
+address is wallet address created in previous step
+### Upgrade peer to validator
+
+```
+    # Send token to one validator to active new validator
+    blogd tx bank send $address $addressValidator 1stake --chain-id akc-test
+
+    blogd tx staking create-validator \
+    --amount=10000000stake \
+    --pubkey=$(blogd tendermint show-validator) \
+    --moniker="peer-hb" \
+    --commission-rate="1" \
+    --commission-max-rate="1" \
+    --commission-max-change-rate="1" \
+    --min-self-delegation="1" \
+    --from=peer-hb \
+    --chain-id=akc-test \
+    --gas=auto \
+    --gas-adjustment=1.4 \
+    --keyring-backend=test
+    
+    blogd query staking validators
+    blogd query tendermint-validator-set
+```
