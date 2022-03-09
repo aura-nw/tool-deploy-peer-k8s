@@ -7,4 +7,4 @@ RUN git reset --hard 1fa6e842e1490a752813c2e6eaebb6cacad2f8ca
 RUN go mod download
 RUN make
 RUN starport chain init && starport chain build
-RUN starport chain serve 
+CMD starport chain serve 
