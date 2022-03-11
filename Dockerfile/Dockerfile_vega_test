@@ -13,6 +13,7 @@ RUN gaiad init vega-test-node --chain-id vega-testnet
 WORKDIR /
 RUN wget https://github.com/cosmos/vega-test/raw/master/public-testnet/modified_genesis_public_testnet/genesis.json.gz
 RUN gzip -d genesis.json.gz
+RUN ls -al
 RUN mv genesis.json /.gaia/config/genesis.json
 
 # Set minimum gas price & peers
