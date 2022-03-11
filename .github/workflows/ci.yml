@@ -22,6 +22,5 @@ jobs:
         GITHUB_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
       run: |
         chmod 777 -R ./ci
-        ./ci/build.sh
         ./ci/build-vega-test.sh
     
