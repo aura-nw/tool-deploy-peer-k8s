@@ -16,6 +16,7 @@ RUN mv genesis.json $HOME/.gaia/config/genesis.json
 
 # Set minimum gas price & peers
 RUN cd $HOME/.gaia/config
+RUN ls -al
 RUN sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0.001uatom"/' app.toml
 RUN sed -i 's/persistent_peers = ""/persistent_peers = "5303f0b47c98727cd7b19965c73b39ce115d3958@134.122.35.247:26656,9e1e3ce30f22083f04ea157e287d338cf20482cf@165.22.235.50:26656,b7feb9619bef083e3a3e86925824f023c252745b@143.198.41.219:26656"/' config.toml
 RUN sed -i 's/enable = false/enable = true/' config.toml
