@@ -1,0 +1,26 @@
+FROM akcadmin/starport:0.18
+RUN apt-get install vim telnet -y
+
+WORKDIR /
+
+# Build gaiad binary and initialize chain
+RUN git clone -b release/v6.0.0-rc3 https://github.com/cosmos/gaia
+WORKDIR /gaia
+RUN make install
+RUN gaiad init vega-test-node --chain-id vega-testnet
+
+# Prepare genesis file
+RUN wget https://github.com/cosmos/vega-test/raw/master/public-testnet/modified_genesis_public_testnet/genesis.json.gz
+RUN gzip -d genesis.json.gz
+RUN mv genesis.json $HOME/.gaia/config/genesis.json
+
+# Set minimum gas price & peers
+RUN cd $HOME/.gaia/config
+RUN sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0.001uatom"/' app.toml
+RUN sed -i 's/persistent_peers = ""/persistent_peers = "5303f0b47c98727cd7b19965c73b39ce115d3958@134.122.35.247:26656,9e1e3ce30f22083f04ea157e287d338cf20482cf@165.22.235.50:26656,b7feb9619bef083e3a3e86925824f023c252745b@143.198.41.219:26656"/' config.toml
+RUN sed -i 's/enable = false/enable = true/' config.toml
+RUN sed -i 's/trust_height = 0/trust_height = 8902700/' config.toml
+RUN sed -i 's/trust_hash = ""/trust_hash = "F45E23C9A11CC83C8B400A5B9BBC70B40B7CFC9EE01867C1E4416A4865C1983B"/' config.toml
+RUN sed -i 's/rpc_servers = ""/rpc_servers = "134.122.35.247:26657,143.244.151.9:26657"/' config.toml
+
+CMD gaiad start --x-crisis-skip-assert-invariants
