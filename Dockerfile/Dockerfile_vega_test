@@ -21,6 +21,7 @@ RUN mv genesis.json /root/.gaia/config/genesis.json
 RUN LATEST_HEIGHT=$(curl -s http://134.122.35.247:26657/block | jq -r .result.block.header.height);
 RUN BLOCK_HEIGHT=$((LATEST_HEIGHT - 1000));
 RUN TRUST_HASH=$(curl -s "http://134.122.35.247:26657/block?height=$BLOCK_HEIGHT" | jq -r .result.block_id.hash)
+RUN echo $LATEST_HEIGHT $BLOCK_HEIGHT $TRUST_HASH
 
 # Set minimum gas price & peers
 WORKDIR /root/.gaia/config
@@ -31,5 +32,6 @@ RUN sed -i 's/enable = false/enable = true/' config.toml
 RUN sed -i 's/trust_height = 0/trust_height = $BLOCK_HEIGHT/' config.toml
 RUN sed -i 's/trust_hash = ""/trust_hash = "$TRUST_HASH"/' config.toml
 RUN sed -i 's/rpc_servers = ""/rpc_servers = "134.122.35.247:26657,143.244.151.9:26657"/' config.toml
+RUN cat app.toml
 
 CMD gaiad start --x-crisis-skip-assert-invariants
