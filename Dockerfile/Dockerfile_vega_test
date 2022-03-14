@@ -1,5 +1,5 @@
 FROM akcadmin/starport:0.18
-RUN sudo apt-get update && sudo apt upgrade -y
+RUN apt-get update && apt upgrade -y
 RUN apt-get install vim telnet make build-essential gcc git jq chrony -y
 
 WORKDIR /
