@@ -18,13 +18,13 @@ RUN ls -al
 RUN mv genesis.json /root/.gaia/config/genesis.json
 
 # Setup Shell variables
-RUN [ "sh", "-c", "RPC=\"http://134.122.35.247:26657\"" ]
-RUN SNAP_RPC="134.122.35.247:26657,143.244.151.9:26657"
-RUN LATEST_HEIGHT=$(curl -s $RPC/block | jq -r .result.block.header.height);
-RUN BLOCK_HEIGHT=$((LATEST_HEIGHT - 1000));
-RUN TRUST_HASH=$(curl -s "$RPC/block?height=$BLOCK_HEIGHT" | jq -r .result.block_id.hash)
+# RUN [ "sh", "-c", "RPC=\"http://134.122.35.247:26657\"" ]
+# RUN SNAP_RPC="134.122.35.247:26657,143.244.151.9:26657"
+# RUN LATEST_HEIGHT=$(curl -s $RPC/block | jq -r .result.block.header.height);
+# RUN BLOCK_HEIGHT=$((LATEST_HEIGHT - 1000));
+# RUN TRUST_HASH=$(curl -s "$RPC/block?height=$BLOCK_HEIGHT" | jq -r .result.block_id.hash)
 
-RUN [ "sh", "-c", "echo $LATEST_HEIGHT $BLOCK_HEIGHT $TRUST_HASH $RPC" ]
+# RUN [ "sh", "-c", "echo $LATEST_HEIGHT $BLOCK_HEIGHT $TRUST_HASH $RPC" ]
 
 # Set minimum gas price & peers
 WORKDIR /root/.gaia/config
@@ -32,9 +32,9 @@ RUN ls -al
 RUN sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0.001uatom"/' app.toml
 RUN sed -i 's/persistent_peers = ""/persistent_peers = "5303f0b47c98727cd7b19965c73b39ce115d3958@134.122.35.247:26656,9e1e3ce30f22083f04ea157e287d338cf20482cf@165.22.235.50:26656,b7feb9619bef083e3a3e86925824f023c252745b@143.198.41.219:26656"/' config.toml
 RUN sed -i 's/enable = false/enable = true/' config.toml
-RUN sed -i 's/trust_height = 0/trust_height = $BLOCK_HEIGHT/' config.toml
-RUN sed -i 's/trust_hash = ""/trust_hash = "$TRUST_HASH"/' config.toml
-RUN sed -i 's/rpc_servers = ""/rpc_servers = "$SNAP_RPC"/' config.toml
+RUN sed -i 's/trust_height = 0/trust_height = 8962500/' config.toml
+RUN sed -i 's/trust_hash = ""/trust_hash = "28FC9075E747598D9725757625E04673205A96924A1B7FD418B51472674614F3"/' config.toml
+RUN sed -i 's/rpc_servers = ""/rpc_servers = "134.122.35.247:26657,143.244.151.9:26657"/' config.toml
 RUN cat app.toml
 RUN cat config.toml
 
