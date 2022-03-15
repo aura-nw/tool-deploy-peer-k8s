@@ -35,9 +35,5 @@ RUN sed -i 's/enable = false/enable = true/' config.toml
 RUN sed -i 's/trust_height = 0/trust_height = 8962500/' config.toml
 RUN sed -i 's/trust_hash = ""/trust_hash = "28FC9075E747598D9725757625E04673205A96924A1B7FD418B51472674614F3"/' config.toml
 RUN sed -i 's/rpc_servers = ""/rpc_servers = "134.122.35.247:26657,143.244.151.9:26657"/' config.toml
-RUN cat app.toml
-RUN cat config.toml
 
 CMD gaiad start --x-crisis-skip-assert-invariants
-
-ENTRYPOINT ["tail", "-f", "/dev/null"]
