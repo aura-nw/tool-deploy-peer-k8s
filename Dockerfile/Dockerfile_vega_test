@@ -18,13 +18,13 @@ RUN ls -al
 RUN mv genesis.json /root/.gaia/config/genesis.json
 
 # Setup Shell variables
-RUN [ "sh", "-c", 'RPC="http://134.122.35.247:26657"']
+RUN [ "sh", "-c", "RPC=\"http://134.122.35.247:26657\"" ]
 RUN SNAP_RPC="134.122.35.247:26657,143.244.151.9:26657"
 RUN LATEST_HEIGHT=$(curl -s $RPC/block | jq -r .result.block.header.height);
 RUN BLOCK_HEIGHT=$((LATEST_HEIGHT - 1000));
 RUN TRUST_HASH=$(curl -s "$RPC/block?height=$BLOCK_HEIGHT" | jq -r .result.block_id.hash)
 
-RUN [ "sh", "-c", 'echo $LATEST_HEIGHT $BLOCK_HEIGHT $TRUST_HASH $RPC']
+RUN [ "sh", "-c", "echo $LATEST_HEIGHT $BLOCK_HEIGHT $TRUST_HASH $RPC" ]
 
 # Set minimum gas price & peers
 WORKDIR /root/.gaia/config
