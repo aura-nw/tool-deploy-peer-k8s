@@ -2,8 +2,6 @@ FROM akcadmin/starport:0.18
 RUN apt-get update && apt upgrade -y
 RUN apt-get install vim telnet make build-essential gcc git jq chrony -y
 
-ENTRYPOINT ["../constant-params/vega-test-param.sh"]
-
 WORKDIR /
 
 # Build gaiad binary and initialize chain
@@ -19,6 +17,15 @@ RUN gzip -d genesis.json.gz
 RUN ls -al
 RUN mv genesis.json /root/.gaia/config/genesis.json
 
+# Setup Shell variables
+CMD RPC="http://134.122.35.247:26657"
+CMD SNAP_RPC="134.122.35.247:26657,143.244.151.9:26657"
+CMD LATEST_HEIGHT=$(curl -s $RPC/block | jq -r .result.block.header.height);
+CMD BLOCK_HEIGHT=$((LATEST_HEIGHT - 1000));
+CMD TRUST_HASH=$(curl -s "$RPC/block?height=$BLOCK_HEIGHT" | jq -r .result.block_id.hash)
+
+CMD echo $LATEST_HEIGHT $BLOCK_HEIGHT $TRUST_HASH
+
 # Set minimum gas price & peers
 WORKDIR /root/.gaia/config
 RUN ls -al
@@ -27,7 +34,7 @@ RUN sed -i 's/persistent_peers = ""/persistent_peers = "5303f0b47c98727cd7b19965
 RUN sed -i 's/enable = false/enable = true/' config.toml
 RUN sed -i 's/trust_height = 0/trust_height = $BLOCK_HEIGHT/' config.toml
 RUN sed -i 's/trust_hash = ""/trust_hash = "$TRUST_HASH"/' config.toml
-RUN sed -i 's/rpc_servers = ""/rpc_servers = "134.122.35.247:26657,143.244.151.9:26657"/' config.toml
+RUN sed -i 's/rpc_servers = ""/rpc_servers = "$SNAP_RPC"/' config.toml
 RUN cat app.toml
 RUN cat config.toml
 
