@@ -25,4 +25,4 @@ RUN sed -i 's/seeds = ""/seeds = "0f9a9c694c46bd28ad9ad6126e923993fc6c56b1@137.1
 # RUN sed -i 's/trust_hash = ""/trust_hash = "F45E23C9A11CC83C8B400A5B9BBC70B40B7CFC9EE01867C1E4416A4865C1983B"/' config.toml
 # RUN sed -i 's/rpc_servers = ""/rpc_servers = "134.122.35.247:26657,143.244.151.9:26657"/' config.toml
 
-CMD osmosisd start
+CMD osmosisd start --x-crisis-skip-assert-invariants
