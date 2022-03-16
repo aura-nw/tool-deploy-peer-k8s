@@ -12,7 +12,7 @@ RUN osmosisd init osmo-test-node --chain-id osmo-test-4
 
 # Prepare genesis file
 WORKDIR /root/.osmosisd/config
-RUN wget wget https://github.com/osmosis-labs/networks/raw/main/osmo-test-4/genesis.tar.bz2
+RUN wget https://github.com/osmosis-labs/networks/raw/main/osmo-test-4/genesis.tar.bz2
 RUN tar -xjf genesis.tar.bz2 && rm genesis.tar.bz2
 
 # Set minimum gas price & peers
