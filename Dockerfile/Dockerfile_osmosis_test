@@ -21,7 +21,7 @@ RUN ls -al
 # RUN sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0.001uatom"/' app.toml
 RUN sed -i 's/persistent_peers = ""/persistent_peers = "4ab030b7fd75ed895c48bcc899b99c17a396736b@137.184.190.127:26656,3dbffa30baab16cc8597df02945dcee0aa0a4581@143.198.139.33:26656"/' /root/.osmosisd/config/config.toml
 RUN sed -i 's/seeds = "21d7539792ee2e0d650b199bf742c56ae0cf499e@162.55.132.230:2000,295b417f995073d09ff4c6c141bd138a7f7b5922@65.21.141.212:2000,ec4d3571bf709ab78df61716e47b5ac03d077a1a@65.108.43.26:2000,4cb8e1e089bdf44741b32638591944dc15b7cce3@65.108.73.18:2000,f515a8599b40f0e84dfad935ba414674ab11a668@osmosis.blockpane.com:26656,6bcdbcfd5d2c6ba58460f10dbcfde58278212833@osmosis.artifact-staking.io:26656"/seeds = "0f9a9c694c46bd28ad9ad6126e923993fc6c56b1@137.184.181.105:26656"/' /root/.osmosisd/config/config.toml
-RUN sed -i 's/pruning = "default"/pruning = "everything"/' /root/.osmosisd/config/app.toml
+# RUN sed -i 's/pruning = "default"/pruning = "everything"/' /root/.osmosisd/config/app.toml
 # RUN sed -i 's/trust_height = 0/trust_height = 8902700/' config.toml
 # RUN sed -i 's/trust_hash = ""/trust_hash = "F45E23C9A11CC83C8B400A5B9BBC70B40B7CFC9EE01867C1E4416A4865C1983B"/' config.toml
 # RUN sed -i 's/rpc_servers = ""/rpc_servers = "134.122.35.247:26657,143.244.151.9:26657"/' config.toml
