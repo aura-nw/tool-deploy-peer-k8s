@@ -1,0 +1,27 @@
+FROM akcadmin/starport:0.18
+RUN apt-get install vim telnet wget liblz4-tool aria2 git build-essential ufw curl jq snapd -y
+
+WORKDIR /
+
+# Build osmosisd binary and initialize chain
+RUN git clone -b v7.0.3 https://github.com/osmosis-labs/osmosis
+WORKDIR /osmosis
+RUN make install
+RUN osmosisd init osmo-test-node --chain-id osmo-test-4
+
+# Prepare genesis file
+WORKDIR /root/.osmosisd/config
+RUN wget wget https://github.com/osmosis-labs/networks/raw/main/osmo-test-4/genesis.tar.bz2
+RUN tar -xjf genesis.tar.bz2 && rm genesis.tar.bz2
+
+# Set minimum gas price & peers
+WORKDIR /
+RUN ls -al
+# RUN sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0.001uatom"/' app.toml
+RUN sed -i 's/persistent_peers = ""/persistent_peers = "4ab030b7fd75ed895c48bcc899b99c17a396736b@137.184.190.127:26656,3dbffa30baab16cc8597df02945dcee0aa0a4581@143.198.139.33:26656"/' /root/.osmosisd/config/config.toml
+RUN sed -i 's/seeds = ""/seeds = "0f9a9c694c46bd28ad9ad6126e923993fc6c56b1@137.184.181.105:26656"/' /root/.osmosisd/config/config.toml
+# RUN sed -i 's/trust_height = 0/trust_height = 8902700/' config.toml
+# RUN sed -i 's/trust_hash = ""/trust_hash = "F45E23C9A11CC83C8B400A5B9BBC70B40B7CFC9EE01867C1E4416A4865C1983B"/' config.toml
+# RUN sed -i 's/rpc_servers = ""/rpc_servers = "134.122.35.247:26657,143.244.151.9:26657"/' config.toml
+
+CMD osmosisd start
