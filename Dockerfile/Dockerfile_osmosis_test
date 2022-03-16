@@ -1,4 +1,5 @@
 FROM akcadmin/starport:0.18
+RUN apt-get update && apt-get upgrade -y
 RUN apt-get install vim telnet wget liblz4-tool aria2 git build-essential ufw curl jq snapd -y
 
 WORKDIR /
