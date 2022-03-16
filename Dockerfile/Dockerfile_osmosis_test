@@ -28,7 +28,7 @@ RUN sed -i 's/seeds = "21d7539792ee2e0d650b199bf742c56ae0cf499e@162.55.132.230:2
 
 # Download snapshot
 WORKDIR /root/.osmosisd
-wget -O - curl https://quicksync.io/osmosis.json|jq -r '.[] |select(.file=="osmotestnet-4-pruned")|select (.mirror=="Netherlands")|.url' | lz4 -d | tar -xvf -
+RUN wget -O - curl https://quicksync.io/osmosis.json|jq -r '.[] |select(.file=="osmotestnet-4-pruned")|select (.mirror=="Netherlands")|.url' | lz4 -d | tar -xvf -
 
 WORKDIR /
 
