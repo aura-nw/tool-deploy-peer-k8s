@@ -26,4 +26,10 @@ RUN sed -i 's/seeds = "21d7539792ee2e0d650b199bf742c56ae0cf499e@162.55.132.230:2
 # RUN sed -i 's/trust_hash = ""/trust_hash = "F45E23C9A11CC83C8B400A5B9BBC70B40B7CFC9EE01867C1E4416A4865C1983B"/' config.toml
 # RUN sed -i 's/rpc_servers = ""/rpc_servers = "134.122.35.247:26657,143.244.151.9:26657"/' config.toml
 
-CMD osmosisd start --x-crisis-skip-assert-invariants
+# Download snapshot
+WORKDIR /root/.osmosisd
+wget -O - curl https://quicksync.io/osmosis.json|jq -r '.[] |select(.file=="osmotestnet-4-pruned")|select (.mirror=="Netherlands")|.url' | lz4 -d | tar -xvf -
+
+WORKDIR /
+
+CMD osmosisd start
