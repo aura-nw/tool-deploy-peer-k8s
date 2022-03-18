@@ -20,7 +20,7 @@ RUN ls -al
 RUN sed -i 's/minimum-gas-prices = "0stake"/minimum-gas-prices = "0.0025ujunox"/' /root/.juno/config/app.toml
 RUN sed -i 's/persistent_peers = ""/persistent_peers = "2ae09360327854c79971d07245764626f43fdfc5@206.189.45.131:26656,1677cc38305b49ae3aac6da6155f7634dc2a3dab@62.171.144.169:26656,5479526dbdf4f27aa59ddc52be9cf2614049d28e@185.216.178.75:26656"/' /root/.juno/config/config.toml
 RUN sed -i 's/seeds = ""/seeds = "8c0ac9bf67ff8ea0b26e915f0dbb44497b8f4ac2@juno-uni.seed.rhinostake.com:26656"/' /root/.juno/config/config.toml
-# RUN sed -i 's/pruning = "default"/pruning = "everything"/' /root/.osmosisd/config/app.toml
+RUN sed -i 's/pruning = "default"/pruning = "everything"/' /root/.juno/config/app.toml
 # RUN sed -i 's/trust_height = 0/trust_height = 8902700/' config.toml
 # RUN sed -i 's/trust_hash = ""/trust_hash = "F45E23C9A11CC83C8B400A5B9BBC70B40B7CFC9EE01867C1E4416A4865C1983B"/' config.toml
 # RUN sed -i 's/rpc_servers = ""/rpc_servers = "rpc.uni.kingnodes.com:443,rpc.uni.kingnodes.com:443"/' /root/.juno/config/config.toml
