@@ -12,7 +12,7 @@ RUN junod init juno-test-node --chain-id uni-2
 
 # Prepare genesis file
 WORKDIR /root/.juno/config
-RUN curl https://raw.githubusercontent.com/CosmosContracts/testnets/main/uni-2/genesis.json > ~/.juno/config/genesis.json
+RUN curl https://raw.githubusercontent.com/CosmosContracts/testnets/main/uni-2/genesis.json > genesis.json
 
 # Set minimum gas price & peers
 WORKDIR /
