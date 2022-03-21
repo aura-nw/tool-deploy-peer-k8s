@@ -1,6 +1,6 @@
 FROM akcadmin/starport:0.18
 RUN apt-get update && apt upgrade -y
-RUN apt-get install vim telnet make build-essential gcc git jq chrony source -y
+RUN apt-get install vim telnet make build-essential gcc git jq chrony -y
 
 WORKDIR /
 
@@ -17,7 +17,6 @@ RUN gzip -d genesis.json.gz
 RUN mv genesis.json /root/.gaia/config/genesis.json
 
 # Set minimum gas price & peers
-WORKDIR /
 RUN sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0.001uatom"/' /root/.gaia/config/app.toml
 RUN sed -i 's/persistent_peers = ""/persistent_peers = "5c9850dc5ec603b0c97ffd8d67bde3221b877acf@p2p.sentry-01.theta-testnet.polypore.xyz:26656,208683ee734ba3cec1cfc0c8bcbc326969641952@p2p.sentry-02.theta-testnet.polypore.xyz:26656,58e9d022962a3875fa22d7146949d0dc34e51ba6@p2p.state-sync-01.theta-testnet.polypore.xyz:26656,6954e0479cd71fa01aeed15e1a3b87c06433d827@p2p.state-sync-02.theta-testnet.polypore.xyz:26656"/' /root/.gaia/config/config.toml
 RUN sed -i 's/enable = false/enable = true/' /root/.gaia/config/config.toml
@@ -25,24 +24,24 @@ RUN sed -i 's/trust_height = 0/trust_height = 9057300/' /root/.gaia/config/confi
 RUN sed -i 's/trust_hash = ""/trust_hash = "35628D6804C6340CC19BBB49E7ED1AAAA4CF1628B4CBDA903EE142BC0D3B7D0A"/' /root/.gaia/config/config.toml
 RUN sed -i 's/rpc_servers = ""/rpc_servers = "rpc.sentry-01.theta-testnet.polypore.xyz:26657,rpc.sentry-02.theta-testnet.polypore.xyz:26657"/' /root/.gaia/config/config.toml
 
-# Setup Cosmovisor
-# RUN go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@latest
-RUN git clone https://github.com/cosmos/cosmos-sdk
-WORKDIR /cosmos-sdk
-RUN git checkout cosmovisor/v1.1.0
-RUN make cosmovisor
+# # Setup Cosmovisor
+# # RUN go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@latest
+# RUN git clone https://github.com/cosmos/cosmos-sdk
+# WORKDIR /cosmos-sdk
+# RUN git checkout cosmovisor/v1.1.0
+# RUN make cosmovisor
 
-WORKDIR /
-RUN echo "export DAEMON_NAME=gaiad" >> /root/.profile
-RUN echo "export DAEMON_HOME=$HOME/.gaia" >> /root/.profile
-RUN source /root/.profile
+# WORKDIR /
+# RUN echo "export DAEMON_NAME=gaiad" >> /root/.profile
+# RUN echo "export DAEMON_HOME=$HOME/.gaia" >> /root/.profile
+# RUN source /root/.profile
 
-RUN mkdir -p /root/.gaia/cosmovisor/upgrades
-RUN mkdir -p /root/.gaia/cosmovisor/genesis/bin/
-RUN cp $(which gaiad) /root/.gaia/cosmovisor/genesis/bin/
-RUN cosmovisor version
+# RUN mkdir -p /root/.gaia/cosmovisor/upgrades
+# RUN mkdir -p /root/.gaia/cosmovisor/genesis/bin/
+# RUN cp $(which gaiad) /root/.gaia/cosmovisor/genesis/bin/
+# RUN cosmovisor version
 
-CMD cosmovisor start --x-crisis-skip-assert-invariants
+# CMD cosmovisor start --x-crisis-skip-assert-invariants
 
 # # Setup Cosmovisor
 # RUN mkdir -p /root/.gaia/cosmovisor/genesis/bin
@@ -77,4 +76,4 @@ CMD cosmovisor start --x-crisis-skip-assert-invariants
 # RUN systemctl restart systemd-journald
 
 # RUN echo journalctl -fu atom-test-node.service"
-# CMD gaiad start --x-crisis-skip-assert-invariants
+CMD gaiad start --x-crisis-skip-assert-invariants
