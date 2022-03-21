@@ -40,40 +40,49 @@ RUN sed -i 's/trust_hash = ""/trust_hash = "35628D6804C6340CC19BBB49E7ED1AAAA4CF
 RUN sed -i 's/rpc_servers = ""/rpc_servers = "rpc.sentry-01.theta-testnet.polypore.xyz:26657,rpc.sentry-02.theta-testnet.polypore.xyz:26657"/' /root/.gaia/config/config.toml
 
 # Setup Cosmovisor
-RUN mkdir -p /root/.gaia/cosmovisor/genesis/bin
-RUN cp $(which gaiad) /root/.gaia/cosmovisor/genesis/bin
-RUN export BINARY=/root/.gaia/cosmovisor/genesis/bin/gaiad
-RUN export GO111MODULE=on
-RUN go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@v1.0.0
+RUN go get github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor
+RUN echo "export DAEMON_NAME=gaiad" >> /root/.profile
+RUN echo "export DAEMON_HOME=$HOME/.gaia" >> /root/.profile
+RUN source ~/.profile
 
-RUN touch /etc/systemd/system/atom-test-node.service
+RUN mkdir -p /root/.gaia/cosmovisor/upgrades
+RUN mkdir -p /root/.gaia/cosmovisor/genesis/bin/
+RUN cp $(which gaiad) /root/.gaia/cosmovisor/genesis/bin/
+RUN cosmovisor version
 
-RUN echo "[Unit]"                               >> /etc/systemd/system/atom-test-node.service
-RUN echo "Description=cosmovisor-atom-test-node" >> /etc/systemd/system/atom-test-node.service
-RUN echo "After=network-online.target"          >> /etc/systemd/system/atom-test-node.service
-RUN echo ""                                     >> /etc/systemd/system/atom-test-node.service
-RUN echo "[Service]"                            >> /etc/systemd/system/atom-test-node.service
-RUN echo "User=root"                        >> /etc/systemd/system/atom-test-node.service
-RUN echo "ExecStart=/root/go/bin/cosmovisor start --x-crisis-skip-assert-invariants --home \$DAEMON_HOME --p2p.persistent_peers 5c9850dc5ec603b0c97ffd8d67bde3221b877acf@p2p.sentry-01.theta-testnet.polypore.xyz:26656,208683ee734ba3cec1cfc0c8bcbc326969641952@p2p.sentry-02.theta-testnet.polypore.xyz:26656,58e9d022962a3875fa22d7146949d0dc34e51ba6@p2p.state-sync-01.theta-testnet.polypore.xyz:26656,6954e0479cd71fa01aeed15e1a3b87c06433d827@p2p.state-sync-02.theta-testnet.polypore.xyz:26656" >> /etc/systemd/system/atom-test-node.service
-RUN echo "Restart=always"                       >> /etc/systemd/system/atom-test-node.service
-RUN echo "RestartSec=3"                         >> /etc/systemd/system/atom-test-node.service
-RUN echo "LimitNOFILE=4096"                     >> /etc/systemd/system/atom-test-node.service
-RUN echo "Environment='DAEMON_NAME=gaiad'"      >> /etc/systemd/system/atom-test-node.service
-RUN echo "Environment='DAEMON_HOME=/root/.gaia'" >> /etc/systemd/system/atom-test-node.service
-RUN echo "Environment='DAEMON_ALLOW_DOWNLOAD_BINARIES=true'" >> /etc/systemd/system/atom-test-node.service
-RUN echo "Environment='DAEMON_RESTART_AFTER_UPGRADE=true'" >> /etc/systemd/system/atom-test-node.service
-RUN echo "Environment='DAEMON_LOG_BUFFER_SIZE=512'" >> /etc/systemd/system/atom-test-node.service
-RUN echo ""                                     >> /etc/systemd/system/atom-test-node.service
-RUN echo "[Install]"                            >> /etc/systemd/system/atom-test-node.service
-RUN echo "WantedBy=multi-user.target"           >> /etc/systemd/system/atom-test-node.service
+CMD cosmovisor start --x-crisis-skip-assert-invariants
 
-RUN service --status-all
-# RUN service daemon-reload
-RUN service atom-test-node.service start
-RUN service systemd-journald restart
+# # Setup Cosmovisor
+# RUN mkdir -p /root/.gaia/cosmovisor/genesis/bin
+# RUN cp $(which gaiad) /root/.gaia/cosmovisor/genesis/bin
+# RUN export BINARY=/root/.gaia/cosmovisor/genesis/bin/gaiad
+# RUN export GO111MODULE=on
+# RUN go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@v1.0.0
+
+# RUN touch /etc/systemd/system/atom-test-node.service
+
+# RUN echo "[Unit]"                               >> /etc/systemd/system/atom-test-node.service
+# RUN echo "Description=cosmovisor-atom-test-node" >> /etc/systemd/system/atom-test-node.service
+# RUN echo "After=network-online.target"          >> /etc/systemd/system/atom-test-node.service
+# RUN echo ""                                     >> /etc/systemd/system/atom-test-node.service
+# RUN echo "[Service]"                            >> /etc/systemd/system/atom-test-node.service
+# RUN echo "User=root"                        >> /etc/systemd/system/atom-test-node.service
+# RUN echo "ExecStart=/root/go/bin/cosmovisor start --x-crisis-skip-assert-invariants --home \$DAEMON_HOME --p2p.persistent_peers 5c9850dc5ec603b0c97ffd8d67bde3221b877acf@p2p.sentry-01.theta-testnet.polypore.xyz:26656,208683ee734ba3cec1cfc0c8bcbc326969641952@p2p.sentry-02.theta-testnet.polypore.xyz:26656,58e9d022962a3875fa22d7146949d0dc34e51ba6@p2p.state-sync-01.theta-testnet.polypore.xyz:26656,6954e0479cd71fa01aeed15e1a3b87c06433d827@p2p.state-sync-02.theta-testnet.polypore.xyz:26656" >> /etc/systemd/system/atom-test-node.service
+# RUN echo "Restart=always"                       >> /etc/systemd/system/atom-test-node.service
+# RUN echo "RestartSec=3"                         >> /etc/systemd/system/atom-test-node.service
+# RUN echo "LimitNOFILE=4096"                     >> /etc/systemd/system/atom-test-node.service
+# RUN echo "Environment='DAEMON_NAME=gaiad'"      >> /etc/systemd/system/atom-test-node.service
+# RUN echo "Environment='DAEMON_HOME=/root/.gaia'" >> /etc/systemd/system/atom-test-node.service
+# RUN echo "Environment='DAEMON_ALLOW_DOWNLOAD_BINARIES=true'" >> /etc/systemd/system/atom-test-node.service
+# RUN echo "Environment='DAEMON_RESTART_AFTER_UPGRADE=true'" >> /etc/systemd/system/atom-test-node.service
+# RUN echo "Environment='DAEMON_LOG_BUFFER_SIZE=512'" >> /etc/systemd/system/atom-test-node.service
+# RUN echo ""                                     >> /etc/systemd/system/atom-test-node.service
+# RUN echo "[Install]"                            >> /etc/systemd/system/atom-test-node.service
+# RUN echo "WantedBy=multi-user.target"           >> /etc/systemd/system/atom-test-node.service
+
 # RUN systemctl daemon-reload
 # RUN systemctl start atom-test-node.service
 # RUN systemctl restart systemd-journald
 
-RUN echo journalctl -fu atom-test-node.service"
+# RUN echo journalctl -fu atom-test-node.service"
 # CMD gaiad start --x-crisis-skip-assert-invariants
