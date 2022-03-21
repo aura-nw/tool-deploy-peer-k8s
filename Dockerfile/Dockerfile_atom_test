@@ -1,0 +1,75 @@
+FROM akcadmin/starport:0.18
+RUN apt-get update && apt upgrade -y
+RUN apt-get install vim telnet make build-essential gcc git jq chrony -y
+
+WORKDIR /
+
+# Set up environment params
+RUN export GAIA_BRANCH=release/v6.0.0
+RUN export GENESIS_ZIPPED_URL=https://github.com/hyphacoop/testnets/raw/add-theta-testnet/v7-theta/public-testnet/genesis.json.gz
+RUN export NODE_HOME=/root/.gaia
+RUN export CHAIN_ID=theta-testnet-001
+RUN export NODE_MONIKER=atom-test-node
+RUN export BINARY=gaiad
+RUN export PERSISTENT_PEERS="5c9850dc5ec603b0c97ffd8d67bde3221b877acf@p2p.sentry-01.theta-testnet.polypore.xyz:26656,208683ee734ba3cec1cfc0c8bcbc326969641952@p2p.sentry-02.theta-testnet.polypore.xyz:26656,58e9d022962a3875fa22d7146949d0dc34e51ba6@p2p.state-sync-01.theta-testnet.polypore.xyz:26656,6954e0479cd71fa01aeed15e1a3b87c06433d827@p2p.state-sync-02.theta-testnet.polypore.xyz:26656"
+
+RUN export STATE_SYNC=true
+RUN export TRUST_HEIGHT=9057300
+RUN export TRUST_HASH="35628D6804C6340CC19BBB49E7ED1AAAA4CF1628B4CBDA903EE142BC0D3B7D0A"
+RUN export SYNC_RPC="rpc.sentry-01.theta-testnet.polypore.xyz:26657,rpc.sentry-02.theta-testnet.polypore.xyz:26657"
+
+# Build gaiad binary and initialize chain
+RUN git clone -b $GAIA_BRANCH https://github.com/cosmos/gaia
+WORKDIR /gaia
+RUN make install
+RUN gaiad init $NODE_MONIKER --chain-id $CHAIN_ID
+
+# Prepare genesis file
+WORKDIR /
+RUN wget $GENESIS_ZIPPED_URL
+RUN gzip -d genesis.json.gz
+RUN mv genesis.json /root/.gaia/config/genesis.json
+
+# Set minimum gas price & peers
+WORKDIR /
+RUN sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0.001uatom"/' /root/.gaia/config/app.toml
+RUN sed -i 's/persistent_peers = ""/persistent_peers = "$PERSISTENT_PEERS"/' /root/.gaia/config/config.toml
+RUN sed -i 's/enable = false/enable = true/' /root/.gaia/config/config.toml
+RUN sed -i 's/trust_height = 0/trust_height = $TRUST_HEIGHT/' /root/.gaia/config/config.toml
+RUN sed -i 's/trust_hash = ""/trust_hash = "$TRUST_HASH"/' /root/.gaia/config/config.toml
+RUN sed -i 's/rpc_servers = ""/rpc_servers = "$SYNC_RPC"/' /root/.gaia/config/config.toml
+
+# Setup Cosmovisor
+RUN mkdir -p $NODE_HOME/cosmovisor/genesis/bin
+RUN cp $(which gaiad) $NODE_HOME/cosmovisor/genesis/bin
+RUN export BINARY=$NODE_HOME/cosmovisor/genesis/bin/gaiad
+RUN export GO111MODULE=on
+RUN go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@v1.0.0
+
+RUN touch /etc/systemd/system/$NODE_MONIKER.service
+
+RUN echo "[Unit]"                               >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "Description=cosmovisor-$NODE_MONIKER" >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "After=network-online.target"          >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo ""                                     >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "[Service]"                            >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "User=root"                        >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "ExecStart=/root/go/bin/cosmovisor start --x-crisis-skip-assert-invariants --home \$DAEMON_HOME --p2p.persistent_peers $PERSISTENT_PEERS" >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "Restart=always"                       >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "RestartSec=3"                         >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "LimitNOFILE=4096"                     >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "Environment='DAEMON_NAME=gaiad'"      >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "Environment='DAEMON_HOME=$NODE_HOME'" >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "Environment='DAEMON_ALLOW_DOWNLOAD_BINARIES=true'" >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "Environment='DAEMON_RESTART_AFTER_UPGRADE=true'" >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "Environment='DAEMON_LOG_BUFFER_SIZE=512'" >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo ""                                     >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "[Install]"                            >> /etc/systemd/system/$NODE_MONIKER.service
+RUN echo "WantedBy=multi-user.target"           >> /etc/systemd/system/$NODE_MONIKER.service
+
+RUN systemctl daemon-reload
+RUN systemctl start $NODE_MONIKER.service
+RUN systemctl restart systemd-journald
+
+RUN echo journalctl -fu $NODE_MONIKER.service"
+# CMD gaiad start --x-crisis-skip-assert-invariants
