@@ -67,9 +67,13 @@ RUN echo ""                                     >> /etc/systemd/system/atom-test
 RUN echo "[Install]"                            >> /etc/systemd/system/atom-test-node.service
 RUN echo "WantedBy=multi-user.target"           >> /etc/systemd/system/atom-test-node.service
 
-RUN systemctl daemon-reload
-RUN systemctl start atom-test-node.service
-RUN systemctl restart systemd-journald
+RUN service --status-all
+RUN service daemon-reload
+RUN service atom-test-node.service start
+RUN service systemd-journald restart
+# RUN systemctl daemon-reload
+# RUN systemctl start atom-test-node.service
+# RUN systemctl restart systemd-journald
 
 RUN echo journalctl -fu atom-test-node.service"
 # CMD gaiad start --x-crisis-skip-assert-invariants
