@@ -43,8 +43,8 @@ RUN sed -i 's/rpc_servers = ""/rpc_servers = "rpc.sentry-01.theta-testnet.polypo
 # RUN go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@latest
 RUN git clone git@github.com:cosmos/cosmos-sdk
 WORKDIR /cosmos-sdk
-git checkout cosmovisor/v1.1.0
-make cosmovisor
+RUN git checkout cosmovisor/v1.1.0
+RUN make cosmovisor
 
 WORKDIR /
 RUN echo "export DAEMON_NAME=gaiad" >> /root/.profile
