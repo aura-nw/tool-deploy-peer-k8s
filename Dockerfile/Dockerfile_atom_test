@@ -1,22 +1,8 @@
 FROM akcadmin/starport:0.18
 RUN apt-get update && apt upgrade -y
-RUN apt-get install vim telnet make build-essential gcc git jq chrony --reinstall systemd -y
+RUN apt-get install vim telnet make build-essential gcc git jq chrony source -y
 
 WORKDIR /
-
-# Set up environment params
-# RUN export GAIA_BRANCH=release/v6.0.0
-# RUN export GENESIS_ZIPPED_URL=https://github.com/hyphacoop/testnets/raw/add-theta-testnet/v7-theta/public-testnet/genesis.json.gz
-# RUN export NODE_HOME=/root/.gaia
-# RUN export CHAIN_ID=theta-testnet-001
-# RUN export NODE_MONIKER=atom-test-node
-# RUN export BINARY=gaiad
-# RUN export PERSISTENT_PEERS="5c9850dc5ec603b0c97ffd8d67bde3221b877acf@p2p.sentry-01.theta-testnet.polypore.xyz:26656,208683ee734ba3cec1cfc0c8bcbc326969641952@p2p.sentry-02.theta-testnet.polypore.xyz:26656,58e9d022962a3875fa22d7146949d0dc34e51ba6@p2p.state-sync-01.theta-testnet.polypore.xyz:26656,6954e0479cd71fa01aeed15e1a3b87c06433d827@p2p.state-sync-02.theta-testnet.polypore.xyz:26656"
-
-# RUN export STATE_SYNC=true
-# RUN export TRUST_HEIGHT=9057300
-# RUN export TRUST_HASH="35628D6804C6340CC19BBB49E7ED1AAAA4CF1628B4CBDA903EE142BC0D3B7D0A"
-# RUN export SYNC_RPC="rpc.sentry-01.theta-testnet.polypore.xyz:26657,rpc.sentry-02.theta-testnet.polypore.xyz:26657"
 
 # Build gaiad binary and initialize chain
 RUN git clone -b release/v6.0.0 https://github.com/cosmos/gaia
