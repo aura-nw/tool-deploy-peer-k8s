@@ -68,7 +68,7 @@ RUN echo "[Install]"                            >> /etc/systemd/system/atom-test
 RUN echo "WantedBy=multi-user.target"           >> /etc/systemd/system/atom-test-node.service
 
 RUN service --status-all
-RUN service daemon-reload
+# RUN service daemon-reload
 RUN service atom-test-node.service start
 RUN service systemd-journald restart
 # RUN systemctl daemon-reload
