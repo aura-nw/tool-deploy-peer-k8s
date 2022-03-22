@@ -5,75 +5,39 @@ RUN apt-get install vim telnet make build-essential gcc git jq chrony -y
 WORKDIR /
 
 # Build gaiad binary and initialize chain
-RUN git clone -b release/v6.0.0 https://github.com/cosmos/gaia
+RUN git clone -b v7.0.0-rc0 https://github.com/cosmos/gaia
 WORKDIR /gaia
 RUN make install
-RUN gaiad init atom-test-node --chain-id theta-testnet-001
+RUN gaiad config chain-id theta-testnet-001 --home /root/.gaia
+RUN gaiad config keyring-backend test --home /root/.gaia   
+RUN gaiad config broadcast-mode block --home /root/.gaia
+RUN gaiad init atom-test-node --home /root/.gaia --chain-id theta-testnet-001
 
 # Prepare genesis file
 WORKDIR /
 RUN wget https://github.com/hyphacoop/testnets/raw/add-theta-testnet/v7-theta/public-testnet/genesis.json.gz
-RUN gzip -d genesis.json.gz
+RUN gunzip -d genesis.json.gz
 RUN mv genesis.json /root/.gaia/config/genesis.json
 
 # Set minimum gas price & peers
 RUN sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0.001uatom"/' /root/.gaia/config/app.toml
 RUN sed -i 's/persistent_peers = ""/persistent_peers = "5c9850dc5ec603b0c97ffd8d67bde3221b877acf@p2p.sentry-01.theta-testnet.polypore.xyz:26656,208683ee734ba3cec1cfc0c8bcbc326969641952@p2p.sentry-02.theta-testnet.polypore.xyz:26656,58e9d022962a3875fa22d7146949d0dc34e51ba6@p2p.state-sync-01.theta-testnet.polypore.xyz:26656,6954e0479cd71fa01aeed15e1a3b87c06433d827@p2p.state-sync-02.theta-testnet.polypore.xyz:26656"/' /root/.gaia/config/config.toml
 RUN sed -i 's/enable = false/enable = true/' /root/.gaia/config/config.toml
-RUN sed -i 's/trust_height = 0/trust_height = 9341200/' /root/.gaia/config/config.toml
-RUN sed -i 's/trust_hash = ""/trust_hash = "F7FD5CC973E80BFB56FEFFD49B689E0297BDFA76DC10BE3DC8B8FC1D2E70DBDC"/' /root/.gaia/config/config.toml
+RUN sed -i 's/trust_height = 0/trust_height = 9352800/' /root/.gaia/config/config.toml
+RUN sed -i 's/trust_hash = ""/trust_hash = "921246FA01022789FEB9AF20E866667483504ED7CE304B1B6C70068EE8019921"/' /root/.gaia/config/config.toml
 RUN sed -i 's/rpc_servers = ""/rpc_servers = "rpc.sentry-01.theta-testnet.polypore.xyz:26657,rpc.sentry-02.theta-testnet.polypore.xyz:26657"/' /root/.gaia/config/config.toml
 
-# # Setup Cosmovisor
-# # RUN go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@latest
-# RUN git clone https://github.com/cosmos/cosmos-sdk
-# WORKDIR /cosmos-sdk
-# RUN git checkout cosmovisor/v1.1.0
-# RUN make cosmovisor
+# Setup Cosmovisor
+RUN go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@v0.1.0
+RUN echo "export DAEMON_NAME=gaiad" >> /root/.profile
+RUN echo "export DAEMON_HOME=/root/.gaia" >> /root/.profile
+RUN echo "export DAEMON_ALLOW_DOWNLOAD_BINARIES=true" >> /root/.profile
+RUN echo "export DAEMON_RESTART_AFTER_UPGRADE=true" >> /root/.profile
+RUN echo "export DAEMON_LOG_BUFFER_SIZE=512" >> /root/.profile
+RUN source ~/.profile
 
-# WORKDIR /
-# RUN echo "export DAEMON_NAME=gaiad" >> /root/.profile
-# RUN echo "export DAEMON_HOME=$HOME/.gaia" >> /root/.profile
-# RUN source /root/.profile
+RUN mkdir -p /root/.gaia/cosmovisor/genesis/bin 
+RUN mkdir -p /root/.gaia/cosmovisor/upgrades
+RUN cp $(which gaiad) /root/.gaia/cosmovisor/genesis/bin
 
-# RUN mkdir -p /root/.gaia/cosmovisor/upgrades
-# RUN mkdir -p /root/.gaia/cosmovisor/genesis/bin/
-# RUN cp $(which gaiad) /root/.gaia/cosmovisor/genesis/bin/
-# RUN cosmovisor version
-
-# CMD cosmovisor start --x-crisis-skip-assert-invariants
-
-# # Setup Cosmovisor
-# RUN mkdir -p /root/.gaia/cosmovisor/genesis/bin
-# RUN cp $(which gaiad) /root/.gaia/cosmovisor/genesis/bin
-# RUN export BINARY=/root/.gaia/cosmovisor/genesis/bin/gaiad
-# RUN export GO111MODULE=on
-# RUN go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@v1.0.0
-
-# RUN touch /etc/systemd/system/atom-test-node.service
-
-# RUN echo "[Unit]"                               >> /etc/systemd/system/atom-test-node.service
-# RUN echo "Description=cosmovisor-atom-test-node" >> /etc/systemd/system/atom-test-node.service
-# RUN echo "After=network-online.target"          >> /etc/systemd/system/atom-test-node.service
-# RUN echo ""                                     >> /etc/systemd/system/atom-test-node.service
-# RUN echo "[Service]"                            >> /etc/systemd/system/atom-test-node.service
-# RUN echo "User=root"                        >> /etc/systemd/system/atom-test-node.service
-# RUN echo "ExecStart=/root/go/bin/cosmovisor start --x-crisis-skip-assert-invariants --home \$DAEMON_HOME --p2p.persistent_peers 5c9850dc5ec603b0c97ffd8d67bde3221b877acf@p2p.sentry-01.theta-testnet.polypore.xyz:26656,208683ee734ba3cec1cfc0c8bcbc326969641952@p2p.sentry-02.theta-testnet.polypore.xyz:26656,58e9d022962a3875fa22d7146949d0dc34e51ba6@p2p.state-sync-01.theta-testnet.polypore.xyz:26656,6954e0479cd71fa01aeed15e1a3b87c06433d827@p2p.state-sync-02.theta-testnet.polypore.xyz:26656" >> /etc/systemd/system/atom-test-node.service
-# RUN echo "Restart=always"                       >> /etc/systemd/system/atom-test-node.service
-# RUN echo "RestartSec=3"                         >> /etc/systemd/system/atom-test-node.service
-# RUN echo "LimitNOFILE=4096"                     >> /etc/systemd/system/atom-test-node.service
-# RUN echo "Environment='DAEMON_NAME=gaiad'"      >> /etc/systemd/system/atom-test-node.service
-# RUN echo "Environment='DAEMON_HOME=/root/.gaia'" >> /etc/systemd/system/atom-test-node.service
-# RUN echo "Environment='DAEMON_ALLOW_DOWNLOAD_BINARIES=true'" >> /etc/systemd/system/atom-test-node.service
-# RUN echo "Environment='DAEMON_RESTART_AFTER_UPGRADE=true'" >> /etc/systemd/system/atom-test-node.service
-# RUN echo "Environment='DAEMON_LOG_BUFFER_SIZE=512'" >> /etc/systemd/system/atom-test-node.service
-# RUN echo ""                                     >> /etc/systemd/system/atom-test-node.service
-# RUN echo "[Install]"                            >> /etc/systemd/system/atom-test-node.service
-# RUN echo "WantedBy=multi-user.target"           >> /etc/systemd/system/atom-test-node.service
-
-# RUN systemctl daemon-reload
-# RUN systemctl start atom-test-node.service
-# RUN systemctl restart systemd-journald
-
-# RUN echo journalctl -fu atom-test-node.service"
-CMD gaiad start --x-crisis-skip-assert-invariants
+CMD cosmovisor start --x-crisis-skip-assert-invariants
