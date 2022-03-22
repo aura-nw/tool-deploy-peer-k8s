@@ -34,6 +34,7 @@ RUN echo "export DAEMON_HOME=/root/.gaia" >> /root/.profile
 RUN echo "export DAEMON_ALLOW_DOWNLOAD_BINARIES=true" >> /root/.profile
 RUN echo "export DAEMON_RESTART_AFTER_UPGRADE=true" >> /root/.profile
 RUN echo "export DAEMON_LOG_BUFFER_SIZE=512" >> /root/.profile
+RUN cat /root/.profile
 # RUN source ~/.profile
 
 RUN mkdir -p /root/.gaia/cosmovisor/genesis/bin 
