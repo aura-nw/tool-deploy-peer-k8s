@@ -8,10 +8,10 @@ WORKDIR /
 RUN git clone -b v7.0.0-rc0 https://github.com/cosmos/gaia
 WORKDIR /gaia
 RUN make install
-RUN gaiad config chain-id theta-testnet-001 --home /root/.gaia
-RUN gaiad config keyring-backend test --home /root/.gaia   
-RUN gaiad config broadcast-mode block --home /root/.gaia
-RUN gaiad init atom-test-node --home /root/.gaia --chain-id theta-testnet-001
+# RUN gaiad config chain-id theta-testnet-001 --home /root/.gaia
+# RUN gaiad config keyring-backend test --home /root/.gaia   
+# RUN gaiad config broadcast-mode block --home /root/.gaia
+RUN gaiad init atom-test-node --chain-id theta-testnet-001
 
 # Prepare genesis file
 WORKDIR /
